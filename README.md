@@ -1,4 +1,4 @@
-# SMS Relay
+# SMS Relay - Working with regulations if they work will upload in playstore 
 
 An Android app for letting users choose which SMS messages to relay to a place where they can read them. The first MVP focuses on a private inbox and email sharing, with delivery channels designed to be replaceable so Google Chat or WhatsApp can be explored later.
 
