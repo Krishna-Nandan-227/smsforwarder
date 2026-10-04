@@ -1,0 +1,50 @@
+com.smsrelay.app-ui-geometry-release-0 C:\Users\krishna\.gradle\caches\8.9\transforms\053344147a8fcbce686734d541564a31\transformed\ui-geometry-release\res
+com.smsrelay.app-material-ripple-release-1 C:\Users\krishna\.gradle\caches\8.9\transforms\07d1a1b45ccd45e229f070d032b11ad1\transformed\material-ripple-release\res
+com.smsrelay.app-lifecycle-runtime-release-2 C:\Users\krishna\.gradle\caches\8.9\transforms\093fbae5a0bc57dd5d310b4997a1dc9e\transformed\lifecycle-runtime-release\res
+com.smsrelay.app-lifecycle-viewmodel-release-3 C:\Users\krishna\.gradle\caches\8.9\transforms\1032629989efed5bf5913d566826809e\transformed\lifecycle-viewmodel-release\res
+com.smsrelay.app-animation-release-4 C:\Users\krishna\.gradle\caches\8.9\transforms\17aa658dd3624246aa2c63726b8f8cda\transformed\animation-release\res
+com.smsrelay.app-activity-ktx-1.10.1-5 C:\Users\krishna\.gradle\caches\8.9\transforms\1bfff139eb2454ee6c92fb557d4bd906\transformed\activity-ktx-1.10.1\res
+com.smsrelay.app-runtime-saveable-release-6 C:\Users\krishna\.gradle\caches\8.9\transforms\23dbaff3c25f918f1756acd9a1a17975\transformed\runtime-saveable-release\res
+com.smsrelay.app-activity-compose-1.10.1-7 C:\Users\krishna\.gradle\caches\8.9\transforms\25b84344b1c1389f7b462d47084165e2\transformed\activity-compose-1.10.1\res
+com.smsrelay.app-annotation-experimental-1.4.1-8 C:\Users\krishna\.gradle\caches\8.9\transforms\280cf8cd6b2faa8c4cccd06db0fdd27b\transformed\annotation-experimental-1.4.1\res
+com.smsrelay.app-foundation-layout-release-9 C:\Users\krishna\.gradle\caches\8.9\transforms\2823fcf4305c7997bfd129ed96e28610\transformed\foundation-layout-release\res
+com.smsrelay.app-lifecycle-process-2.8.7-10 C:\Users\krishna\.gradle\caches\8.9\transforms\289e4caed77a85d2c17e79d9b9c07a9f\transformed\lifecycle-process-2.8.7\res
+com.smsrelay.app-customview-poolingcontainer-1.0.0-11 C:\Users\krishna\.gradle\caches\8.9\transforms\289f0772290e6e66dd3928246cb12132\transformed\customview-poolingcontainer-1.0.0\res
+com.smsrelay.app-core-runtime-2.2.0-12 C:\Users\krishna\.gradle\caches\8.9\transforms\28f8af6089d37af36c87187880542ea8\transformed\core-runtime-2.2.0\res
+com.smsrelay.app-savedstate-1.2.1-13 C:\Users\krishna\.gradle\caches\8.9\transforms\2bb5dff9849af1a935f774707c967998\transformed\savedstate-1.2.1\res
+com.smsrelay.app-lifecycle-viewmodel-ktx-2.8.7-14 C:\Users\krishna\.gradle\caches\8.9\transforms\36cf5dbde7d9e38a4b2e906abef214d1\transformed\lifecycle-viewmodel-ktx-2.8.7\res
+com.smsrelay.app-animation-core-release-15 C:\Users\krishna\.gradle\caches\8.9\transforms\3a020e5f10acb29d4c71e0599c044ac7\transformed\animation-core-release\res
+com.smsrelay.app-ui-release-16 C:\Users\krishna\.gradle\caches\8.9\transforms\3bc6a492bf9079f2859704f3aa8851a3\transformed\ui-release\res
+com.smsrelay.app-material3-release-17 C:\Users\krishna\.gradle\caches\8.9\transforms\3ca71ae178bb67fa7f53f93f20f2d97c\transformed\material3-release\res
+com.smsrelay.app-profileinstaller-1.4.0-18 C:\Users\krishna\.gradle\caches\8.9\transforms\443634ab2c5337046d7843c88b536489\transformed\profileinstaller-1.4.0\res
+com.smsrelay.app-lifecycle-viewmodel-compose-release-19 C:\Users\krishna\.gradle\caches\8.9\transforms\530600ea0f3f7fe780436baf9d169d05\transformed\lifecycle-viewmodel-compose-release\res
+com.smsrelay.app-savedstate-ktx-1.2.1-20 C:\Users\krishna\.gradle\caches\8.9\transforms\54647d1ad016305433528eb24fa641c1\transformed\savedstate-ktx-1.2.1\res
+com.smsrelay.app-ui-unit-release-21 C:\Users\krishna\.gradle\caches\8.9\transforms\5571707d6ec5b99d13ca8bf3f90f787c\transformed\ui-unit-release\res
+com.smsrelay.app-ui-graphics-release-22 C:\Users\krishna\.gradle\caches\8.9\transforms\55a71f91a8cd58bd28705c8a0dbf1a58\transformed\ui-graphics-release\res
+com.smsrelay.app-lifecycle-viewmodel-savedstate-2.8.7-23 C:\Users\krishna\.gradle\caches\8.9\transforms\5bdacfcb80d3b295c8d041001a789c97\transformed\lifecycle-viewmodel-savedstate-2.8.7\res
+com.smsrelay.app-ui-tooling-data-release-24 C:\Users\krishna\.gradle\caches\8.9\transforms\6dc3f2045608de294a62ad674dfeea79\transformed\ui-tooling-data-release\res
+com.smsrelay.app-material-icons-core-release-25 C:\Users\krishna\.gradle\caches\8.9\transforms\6ea97068cd250e4d95561bcd69e64d96\transformed\material-icons-core-release\res
+com.smsrelay.app-startup-runtime-1.1.1-26 C:\Users\krishna\.gradle\caches\8.9\transforms\7439162ed31f6448f2251ed5c595dd1e\transformed\startup-runtime-1.1.1\res
+com.smsrelay.app-graphics-path-1.0.1-27 C:\Users\krishna\.gradle\caches\8.9\transforms\79406d806e7e82ef0d810c74d225e7f3\transformed\graphics-path-1.0.1\res
+com.smsrelay.app-ui-text-release-28 C:\Users\krishna\.gradle\caches\8.9\transforms\7a3dbd36ca78a56715313aea29c6384c\transformed\ui-text-release\res
+com.smsrelay.app-lifecycle-runtime-ktx-release-29 C:\Users\krishna\.gradle\caches\8.9\transforms\819fd8f336254e049af7b31debebe819\transformed\lifecycle-runtime-ktx-release\res
+com.smsrelay.app-runtime-release-30 C:\Users\krishna\.gradle\caches\8.9\transforms\86e1f9a322ef68aba38df98c71a30551\transformed\runtime-release\res
+com.smsrelay.app-core-viewtree-1.0.0-31 C:\Users\krishna\.gradle\caches\8.9\transforms\89ba5e1e9fa1bfe7039a12f7dd2db617\transformed\core-viewtree-1.0.0\res
+com.smsrelay.app-lifecycle-runtime-compose-release-32 C:\Users\krishna\.gradle\caches\8.9\transforms\93df6a91dba00190cddf1e05c6b0400f\transformed\lifecycle-runtime-compose-release\res
+com.smsrelay.app-emoji2-1.3.0-33 C:\Users\krishna\.gradle\caches\8.9\transforms\abf44f1c8f389a64b21db09fe0fa297e\transformed\emoji2-1.3.0\res
+com.smsrelay.app-material-release-34 C:\Users\krishna\.gradle\caches\8.9\transforms\ad49a7676bd3192d50f53ce96fba0fe7\transformed\material-release\res
+com.smsrelay.app-ui-tooling-preview-release-35 C:\Users\krishna\.gradle\caches\8.9\transforms\adb822825363fddbc41a8d7496c27949\transformed\ui-tooling-preview-release\res
+com.smsrelay.app-core-ktx-1.13.1-36 C:\Users\krishna\.gradle\caches\8.9\transforms\b68e8f21ae70a5f6cccf02a15fc8fb7e\transformed\core-ktx-1.13.1\res
+com.smsrelay.app-ui-util-release-37 C:\Users\krishna\.gradle\caches\8.9\transforms\b9b0f6c997a5d67a86679f13e9208d0d\transformed\ui-util-release\res
+com.smsrelay.app-lifecycle-livedata-core-2.8.7-38 C:\Users\krishna\.gradle\caches\8.9\transforms\cdd8bc887333fbfbc9eacd09dd731898\transformed\lifecycle-livedata-core-2.8.7\res
+com.smsrelay.app-ui-tooling-release-39 C:\Users\krishna\.gradle\caches\8.9\transforms\e2236d0b08c8cdcd8a6a8e4833572efa\transformed\ui-tooling-release\res
+com.smsrelay.app-foundation-release-40 C:\Users\krishna\.gradle\caches\8.9\transforms\e7d9e3f496c010d784d13556a5622c3f\transformed\foundation-release\res
+com.smsrelay.app-activity-1.10.1-41 C:\Users\krishna\.gradle\caches\8.9\transforms\f03fbf62a306ad4c858edfe6cf97dc58\transformed\activity-1.10.1\res
+com.smsrelay.app-core-1.13.1-42 C:\Users\krishna\.gradle\caches\8.9\transforms\f3425c03d1c45d02b726549a2fcdbc00\transformed\core-1.13.1\res
+com.smsrelay.app-pngs-43 C:\Users\krishna\Documents\kriz proje\app\build\generated\res\pngs\debug
+com.smsrelay.app-resValues-44 C:\Users\krishna\Documents\kriz proje\app\build\generated\res\resValues\debug
+com.smsrelay.app-packageDebugResources-45 C:\Users\krishna\Documents\kriz proje\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.smsrelay.app-packageDebugResources-46 C:\Users\krishna\Documents\kriz proje\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.smsrelay.app-debug-47 C:\Users\krishna\Documents\kriz proje\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.smsrelay.app-debug-48 C:\Users\krishna\Documents\kriz proje\app\src\debug\res
+com.smsrelay.app-main-49 C:\Users\krishna\Documents\kriz proje\app\src\main\res
