@@ -5,11 +5,15 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +41,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +58,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -60,10 +70,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
         sharedSms = intent.toSharedSms()
 
         setContent {
-            MaterialTheme(colorScheme = SmsRelayColors) {
+            MaterialTheme(colorScheme = SmsRelayColors, typography = SmsRelayTypography) {
                 AuthenticationGate { accountEmail, onSignOut ->
                     SmsRelayApp(
                         sharedSms = sharedSms,
@@ -91,21 +105,39 @@ private val Slate = Color(0xFF253745)
 private val Steel = Color(0xFF4A5C6A)
 private val Mist = Color(0xFF9BA8AB)
 private val Cloud = Color(0xFFCCD0CF)
+private val Paper = Color(0xFFFAFAF7)
+private val AppBackground = Color(0xFFF4F3EE)
+private val Hairline = Color(0xFFD9DDDB)
+
+private val SmsRelayTypography = Typography(
+    headlineMedium = TextStyle(fontFamily = FontFamily.Serif, fontSize = 36.sp, lineHeight = 44.sp),
+    headlineSmall = TextStyle(fontFamily = FontFamily.Serif, fontSize = 30.sp, lineHeight = 38.sp),
+    titleLarge = TextStyle(fontSize = 22.sp, lineHeight = 30.sp, fontWeight = FontWeight.SemiBold),
+    titleMedium = TextStyle(fontSize = 18.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
+    bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 26.sp),
+    bodyMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
+    bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 21.sp),
+    labelLarge = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium),
+    labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+    labelSmall = TextStyle(fontSize = 13.sp, lineHeight = 19.sp),
+)
 
 private val SmsRelayColors = lightColorScheme(
     primary = Slate,
-    onPrimary = Cloud,
+    onPrimary = Paper,
     primaryContainer = Mist,
     onPrimaryContainer = Ink,
-    secondary = Steel,
+    secondary = Slate,
     onSecondary = Cloud,
-    background = Cloud,
+    background = AppBackground,
     onBackground = Ink,
-    surface = Cloud,
+    surface = Paper,
     onSurface = Ink,
-    surfaceVariant = Mist,
+    surfaceVariant = Cloud,
     onSurfaceVariant = DeepSlate,
     outline = Steel,
+    outlineVariant = Hairline,
+    error = Color(0xFF823B3B),
 )
 
 private data class SmsItem(
@@ -199,14 +231,14 @@ private fun SmsRelayApp(
                 TopAppBar(
                     title = {
                         Text(
-                            text = "SMS Relay",
-                            color = Cloud,
+                            text = "SMSForwarder",
+                            color = Ink,
                             style = MaterialTheme.typography.titleLarge,
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = DeepSlate,
-                        titleContentColor = Cloud,
+                        containerColor = AppBackground,
+                        titleContentColor = Ink,
                     ),
                 )
             },
@@ -342,7 +374,7 @@ internal fun LoadingScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Cloud),
+            .background(AppBackground),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -388,18 +420,18 @@ private fun InboxScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Cloud)
+            .background(AppBackground)
             .padding(20.dp),
     ) {
         Text(
-            text = "Messages",
+            text = "Your messages",
             style = MaterialTheme.typography.headlineSmall,
             color = Ink,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = if (forwardingEnabled) "Forwarding is on" else "Forwarding is paused",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodyMedium,
             color = Steel,
         )
         Text(
@@ -410,31 +442,38 @@ private fun InboxScreen(
         Spacer(Modifier.height(16.dp))
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(messages) { message ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Mist),
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, Hairline),
+                    colors = CardDefaults.cardColors(containerColor = Paper),
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
                                 text = message.sender,
+                                modifier = Modifier.weight(1f).padding(end = 8.dp),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Ink,
                             )
-                            Text(
-                                text = message.category,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = DeepSlate,
-                            )
+                            Surface(shape = RoundedCornerShape(8.dp), color = AppBackground) {
+                                Text(
+                                    text = message.category,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = DeepSlate,
+                                )
+                            }
                         }
                         Text(
                             text = message.receivedAt,
@@ -472,7 +511,8 @@ private fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Cloud)
+            .background(AppBackground)
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
@@ -501,7 +541,9 @@ private fun SettingsScreen(
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Mist),
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, Hairline),
+            colors = CardDefaults.cardColors(containerColor = Paper),
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -536,7 +578,9 @@ private fun PreferenceRow(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Mist),
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, Hairline),
+        colors = CardDefaults.cardColors(containerColor = Paper),
     ) {
         Row(
             modifier = Modifier

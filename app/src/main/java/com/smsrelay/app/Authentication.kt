@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
@@ -100,6 +101,13 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
     var error by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
     val colors = MaterialTheme.colorScheme
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedContainerColor = colors.surface,
+        unfocusedContainerColor = colors.surface,
+        unfocusedBorderColor = colors.outlineVariant,
+        focusedBorderColor = colors.primary,
+        unfocusedLabelColor = colors.secondary,
+    )
     val clientId = remember {
         val id = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
         if (id == 0) "" else context.getString(id)
@@ -141,40 +149,41 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
 
     Column(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding()
-            .verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 32.dp),
+            .verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Row(
-            modifier = Modifier.size(64.dp, 50.dp).clip(
-                RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 5.dp)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          Row(
+            modifier = Modifier.size(40.dp, 32.dp).clip(
+                RoundedCornerShape(topStart = 11.dp, topEnd = 11.dp, bottomEnd = 11.dp, bottomStart = 3.dp)
             ).background(colors.primary),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             repeat(3) {
-                Box(Modifier.padding(horizontal = 3.dp).size(7.dp)
+                Box(Modifier.padding(horizontal = 2.dp).size(4.dp)
                     .clip(RoundedCornerShape(50)).background(colors.onPrimary))
             }
         }
-        Spacer(Modifier.height(16.dp))
-        Text("SMSForwarder", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(24.dp))
-        Text(if (registering) "Create your account" else "Welcome back",
-            style = MaterialTheme.typography.headlineMedium)
+          Text("SMSForwarder", style = MaterialTheme.typography.titleMedium)
+        }
+        Spacer(Modifier.height(40.dp))
+        Text(if (registering) "Create your account." else "Welcome back.",
+            style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
-        Text(if (registering) "Start managing your messages in one place."
-            else "Sign in to continue to your messages.",
-            style = MaterialTheme.typography.bodyMedium, color = colors.secondary)
-        Spacer(Modifier.height(24.dp))
+        Text(if (registering) "A simpler home for your messages."
+            else "Your important messages, together.",
+            style = MaterialTheme.typography.bodyMedium, color = colors.secondary,
+            textAlign = TextAlign.Center)
+        Spacer(Modifier.height(32.dp))
 
         Card(
             modifier = Modifier.widthIn(max = 440.dp).fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = colors.background),
-            border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline.copy(alpha = 0.4f)),
         ) {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedButton(
                     onClick = {
                         runAction {
@@ -189,30 +198,29 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
                             auth!!.signInWithCredential(GoogleAuthProvider.getCredential(token, null)).await()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.outlineVariant),
                     enabled = !busy && auth != null && clientId.isNotBlank(),
                 ) { Text("Continue with Google") }
-                if (clientId.isBlank()) {
-                    Text(
-                        "Google sign-in is currently unavailable. Use email below.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.secondary,
-                    )
-                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     HorizontalDivider(Modifier.weight(1f), color = colors.outline.copy(alpha = 0.3f))
-                    Text("  or use email  ", style = MaterialTheme.typography.labelMedium, color = colors.secondary)
+                    Text("  or sign in with email  ", style = MaterialTheme.typography.bodySmall, color = colors.secondary)
                     HorizontalDivider(Modifier.weight(1f), color = colors.outline.copy(alpha = 0.3f))
                 }
                 OutlinedTextField(
                     value = email, onValueChange = { email = it; error = null },
                     label = { Text("Email address") }, singleLine = true, enabled = !busy,
+                    colors = fieldColors,
+                    textStyle = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                 )
                 OutlinedTextField(
                     value = password, onValueChange = { password = it; error = null },
                     label = { Text("Password") }, singleLine = true, enabled = !busy,
+                    colors = fieldColors,
+                    textStyle = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
                     visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,
@@ -225,6 +233,8 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
                     OutlinedTextField(
                         value = confirmation, onValueChange = { confirmation = it; error = null },
                         label = { Text("Confirm password") }, singleLine = true, enabled = !busy,
+                        colors = fieldColors,
+                        textStyle = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
                         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
@@ -240,9 +250,13 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
                         }
                     }, enabled = !busy, modifier = Modifier.align(Alignment.End)) { Text("Forgot password?") }
                 }
-                error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = colors.error,
-                    modifier = Modifier.fillMaxWidth()) }
-                notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = colors.secondary) }
+                error?.let {
+                    Surface(shape = RoundedCornerShape(10.dp), color = colors.background) {
+                        Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.error,
+                            modifier = Modifier.fillMaxWidth().padding(12.dp))
+                    }
+                }
+                notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.secondary) }
                 Button(
                     onClick = {
                         val emailValue = email.trim()
@@ -257,7 +271,7 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
                             if (registering) auth!!.createUserWithEmailAndPassword(emailValue, password).await()
                             else auth!!.signInWithEmailAndPassword(emailValue, password).await()
                         }
-                    }, enabled = !busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    }, enabled = !busy, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                     shape = RoundedCornerShape(12.dp),
                 ) {
                     if (busy) {
@@ -268,11 +282,17 @@ private fun AuthenticationScreen(auth: FirebaseAuth?, credentials: CredentialMan
                 }
             }
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
         Text(if (registering) "Already have an account?" else "New to SMSForwarder?",
             style = MaterialTheme.typography.bodyMedium, color = colors.secondary)
         TextButton(onClick = { changeMode() }, enabled = !busy) {
             Text(if (registering) "Sign in" else "Create an account")
+        }
+        if (clientId.isBlank()) {
+            Spacer(Modifier.height(20.dp))
+            Text("Google sign-in is coming soon. You can use email today.",
+                style = MaterialTheme.typography.bodySmall, color = colors.secondary,
+                textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 300.dp))
         }
     }
 }
