@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Keep the supplied image's proportions within the adaptive icon safe area. -->
+    <item
+        android:width="60dp"
+        android:height="66dp"
+        android:gravity="center"
+        android:drawable="@drawable/sms_logo" />
+</layer-list>

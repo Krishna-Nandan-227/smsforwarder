@@ -9,9 +9,24 @@ password reset, and sign-out using Firebase Authentication. Follow
 [AUTH_SETUP.md](AUTH_SETUP.md) to connect your Firebase project. Without configuration,
 the authentication screens open but cannot create accounts or sign in.
 
-This is the starter product and Android project skeleton. It does not yet read live SMS or send email. Those features need device testing and a deliberate privacy and permission design.
+The app supports a local inbox, saved email destinations, rules, and a profile.
+It imports user-shared text and opens email drafts. Live SMS reading and automatic
+delivery are not yet connected.
 
-## MVP scope
+## Current workspace
+
+- Inbox: search sample previews and texts imported using Android's Share action.
+- Accounts: add, edit, and remove named email destinations; choose one when sharing a message.
+- Rules: pause manual sharing, hide messages labeled Financial, and filter exact sender names.
+- Profile: save a display name and About me, view workspace counts, and sign out.
+
+Destinations, rules, profile details, and imported messages are stored locally per
+signed-in account. Email sharing opens a prefilled draft in an installed email app;
+the user sends it. Live SMS collection, automatic delivery, Google Chat, and WhatsApp
+are not yet connected. Sender and financial filters use the message's existing labels;
+shared text is labeled User shared.
+
+## Planned scope
 
 - Show a simple inbox of relayed messages, labeled with sender and timestamp.
 - Let the user choose all senders or allowlist specific senders.

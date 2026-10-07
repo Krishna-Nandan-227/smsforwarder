@@ -1,7 +1,6 @@
 package com.smsrelay.app
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,8 +11,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,28 +24,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,7 +49,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private var sharedSms by mutableStateOf<SmsItem?>(null)
@@ -79,10 +65,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme(colorScheme = SmsRelayColors, typography = SmsRelayTypography) {
                 AuthenticationGate { accountEmail, onSignOut ->
-                    SmsRelayApp(
+                    WorkspaceScreen(
                         sharedSms = sharedSms,
                         shareSequence = shareSequence,
-                        onClearSharedSms = { sharedSms = null },
+                        onClearSharedSms = {
+                            sharedSms = null
+                            // Avoid importing the same launch intent again after rotation.
+                            setIntent(Intent(this@MainActivity, MainActivity::class.java).setAction(Intent.ACTION_MAIN))
+                        },
                         accountEmail = accountEmail,
                         onSignOut = onSignOut,
                     )
@@ -140,7 +130,7 @@ private val SmsRelayColors = lightColorScheme(
     error = Color(0xFF823B3B),
 )
 
-private data class SmsItem(
+internal data class SmsItem(
     val sender: String,
     val category: String,
     val receivedAt: String,
@@ -174,168 +164,13 @@ private fun Intent.toSharedSms(): SmsItem? {
             ?.takeIf { it.isNotBlank() }
             ?: "Shared message",
         category = "User shared",
-        receivedAt = "Just now",
+        receivedAt = java.text.DateFormat.getDateTimeInstance(
+            java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT,
+        ).format(java.util.Date()),
         body = body,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SmsRelayApp(
-    sharedSms: SmsItem?,
-    shareSequence: Int,
-    onClearSharedSms: () -> Unit,
-    accountEmail: String,
-    onSignOut: () -> Unit,
-) {
-    var forwardingEnabled by remember { mutableStateOf(false) }
-    var includeFinancial by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf("Inbox") }
-
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    val messages = remember {
-        listOf(
-            SmsItem(
-                "ParcelDesk",
-                "Delivery",
-                "Today · 10:42 AM",
-                "Your parcel is out for delivery. Tracking: PD48291.",
-            ),
-            SmsItem(
-                "City Clinic",
-                "Appointment",
-                "Today · 9:15 AM",
-                "Reminder: appointment tomorrow at 11:30 AM.",
-            ),
-            SmsItem(
-                "Bank ABC",
-                "Financial",
-                "Yesterday · 7:06 PM",
-                "A transaction alert would appear here. Financial forwarding is off by default.",
-            ),
-        )
-    }
-
-
-    LaunchedEffect(shareSequence) {
-        if (shareSequence > 0) selectedTab = "Inbox"
-    }
-
-    run {
-        Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "SMSForwarder",
-                            color = Ink,
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = AppBackground,
-                        titleContentColor = Ink,
-                    ),
-                )
-            },
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            },
-            bottomBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    if (selectedTab == "Inbox") {
-                        Button(
-                            onClick = { selectedTab = "Inbox" },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Inbox")
-                        }
-                    } else {
-                        OutlinedButton(
-                            onClick = { selectedTab = "Inbox" },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Inbox")
-                        }
-                    }
-
-                    if (selectedTab == "Settings") {
-                        Button(
-                            onClick = { selectedTab = "Settings" },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Settings")
-                        }
-                    } else {
-                        OutlinedButton(
-                            onClick = { selectedTab = "Settings" },
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text("Settings")
-                        }
-                    }
-                }
-            },
-        ) { padding ->
-            if (selectedTab == "Inbox") {
-                InboxScreen(
-                    messages = if (sharedSms == null) {
-                        messages
-                    } else {
-                        listOf(sharedSms) + messages
-                    },
-                    forwardingEnabled = forwardingEnabled,
-                    onEmailShare = { item ->
-                        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("mailto:")
-                            putExtra(
-                                Intent.EXTRA_SUBJECT,
-                                "SMS from ${item.sender}",
-                            )
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "${item.sender} · ${item.receivedAt}\n\n${item.body}",
-                            )
-                        }
-
-                        try {
-                            context.startActivity(emailIntent)
-                        } catch (_: android.content.ActivityNotFoundException) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    "No email app is available on this device."
-                                )
-                            }
-                        }
-
-                        onClearSharedSms()
-                    },
-                    modifier = Modifier.padding(padding),
-                )
-            } else {
-                SettingsScreen(
-                    accountEmail = accountEmail,
-                    onSignOut = onSignOut,
-                    forwardingEnabled = forwardingEnabled,
-                    onForwardingChange = { forwardingEnabled = it },
-                    includeFinancial = includeFinancial,
-                    onFinancialChange = { includeFinancial = it },
-                    modifier = Modifier.padding(padding),
-                )
-            }
-        }
-    }
-}
 
 @Composable
 internal fun LoadingScreen() {
@@ -411,10 +246,13 @@ internal fun LoadingScreen() {
 }
 
 @Composable
-private fun InboxScreen(
+internal fun InboxScreen(
     messages: List<SmsItem>,
     forwardingEnabled: Boolean,
     onEmailShare: (SmsItem) -> Unit,
+    search: String,
+    onSearchChange: (String) -> Unit,
+    hasImports: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -430,16 +268,26 @@ private fun InboxScreen(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = if (forwardingEnabled) "Forwarding is on" else "Forwarding is paused",
+            text = if (forwardingEnabled) "Ready to share" else "Sharing is paused",
             style = MaterialTheme.typography.bodyMedium,
             color = Steel,
         )
         Text(
-            text = "Sample inbox",
+            text = if (hasImports) "Imported messages and sample previews" else "Sample inbox · Share SMS text into this app to import it",
             style = MaterialTheme.typography.bodyMedium,
             color = Steel,
         )
         Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            value = search, onValueChange = onSearchChange,
+            placeholder = { Text("Search messages or senders") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+        )
+        Spacer(Modifier.height(16.dp))
+        if (messages.isEmpty()) {
+            Text("No messages match your search or rules.", color = Steel)
+        }
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -488,127 +336,13 @@ private fun InboxScreen(
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
                             onClick = { onEmailShare(message) },
+                            enabled = forwardingEnabled,
                         ) {
-                            Text("Share by email", color = Slate)
+                            Text("Share message")
                         }
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SettingsScreen(
-    accountEmail: String,
-    onSignOut: () -> Unit,
-    forwardingEnabled: Boolean,
-    onForwardingChange: (Boolean) -> Unit,
-    includeFinancial: Boolean,
-    onFinancialChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(AppBackground)
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
-    ) {
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineSmall,
-            color = Ink,
-        )
-
-        Text(accountEmail, style = MaterialTheme.typography.bodyMedium, color = Steel)
-        OutlinedButton(onClick = onSignOut) { Text("Sign out") }
-
-        PreferenceRow(
-            title = "Forward selected messages",
-            detail = "Collection is not connected yet",
-            checked = forwardingEnabled,
-            onCheckedChange = onForwardingChange,
-        )
-
-        PreferenceRow(
-            title = "Include financial SMS",
-            detail = "Off by default; enable only if you want these forwarded",
-            checked = includeFinancial,
-            onCheckedChange = onFinancialChange,
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, Hairline),
-            colors = CardDefaults.cardColors(containerColor = Paper),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = "Delivery",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Ink,
-                )
-                Text(
-                    text = "Email sharing is the first delivery option. Google Chat and WhatsApp can be added as separate channels.",
-                    color = DeepSlate,
-                )
-            }
-        }
-
-        Text(
-            text = "Sample previews only. Live SMS access and delivery are not connected yet.",
-            style = MaterialTheme.typography.bodySmall,
-            color = Steel,
-        )
-    }
-}
-
-@Composable
-private fun PreferenceRow(
-    title: String,
-    detail: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, Hairline),
-        colors = CardDefaults.cardColors(containerColor = Paper),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 12.dp),
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Ink,
-                )
-                Text(
-                    text = detail,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = DeepSlate,
-                )
-            }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-            )
         }
     }
 }
