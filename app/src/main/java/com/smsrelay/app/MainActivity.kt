@@ -52,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -65,11 +64,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(colorScheme = SmsRelayColors) {
-                SmsRelayApp(
-                    sharedSms = sharedSms,
-                    shareSequence = shareSequence,
-                    onClearSharedSms = { sharedSms = null },
-                )
+                AuthenticationGate { accountEmail, onSignOut ->
+                    SmsRelayApp(
+                        sharedSms = sharedSms,
+                        shareSequence = shareSequence,
+                        onClearSharedSms = { sharedSms = null },
+                        accountEmail = accountEmail,
+                        onSignOut = onSignOut,
+                    )
+                }
             }
         }
     }
@@ -150,11 +153,12 @@ private fun SmsRelayApp(
     sharedSms: SmsItem?,
     shareSequence: Int,
     onClearSharedSms: () -> Unit,
+    accountEmail: String,
+    onSignOut: () -> Unit,
 ) {
     var forwardingEnabled by remember { mutableStateOf(false) }
     var includeFinancial by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("Inbox") }
-    var isLoading by remember { mutableStateOf(true) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -183,19 +187,12 @@ private fun SmsRelayApp(
         )
     }
 
-    // Demo launch transition. Replace this timer with real initialization later.
-    LaunchedEffect(Unit) {
-        delay(900)
-        isLoading = false
-    }
 
     LaunchedEffect(shareSequence) {
         if (shareSequence > 0) selectedTab = "Inbox"
     }
 
-    if (isLoading) {
-        LoadingScreen()
-    } else {
+    run {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
@@ -295,6 +292,8 @@ private fun SmsRelayApp(
                 )
             } else {
                 SettingsScreen(
+                    accountEmail = accountEmail,
+                    onSignOut = onSignOut,
                     forwardingEnabled = forwardingEnabled,
                     onForwardingChange = { forwardingEnabled = it },
                     includeFinancial = includeFinancial,
@@ -307,7 +306,7 @@ private fun SmsRelayApp(
 }
 
 @Composable
-private fun LoadingScreen() {
+internal fun LoadingScreen() {
     val animation = rememberInfiniteTransition(label = "loading-mark")
 
     val firstScale by animation.animateFloat(
@@ -462,6 +461,8 @@ private fun InboxScreen(
 
 @Composable
 private fun SettingsScreen(
+    accountEmail: String,
+    onSignOut: () -> Unit,
     forwardingEnabled: Boolean,
     onForwardingChange: (Boolean) -> Unit,
     includeFinancial: Boolean,
@@ -480,6 +481,9 @@ private fun SettingsScreen(
             style = MaterialTheme.typography.headlineSmall,
             color = Ink,
         )
+
+        Text(accountEmail, style = MaterialTheme.typography.bodyMedium, color = Steel)
+        OutlinedButton(onClick = onSignOut) { Text("Sign out") }
 
         PreferenceRow(
             title = "Forward selected messages",

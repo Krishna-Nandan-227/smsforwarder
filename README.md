@@ -4,6 +4,11 @@ An Android app for letting users choose which SMS messages to relay to a place w
 
 ## Current status
 
+Includes slate-grey email/password sign-in, registration, Google sign-in,
+password reset, and sign-out using Firebase Authentication. Follow
+[AUTH_SETUP.md](AUTH_SETUP.md) to connect your Firebase project. Without configuration,
+the authentication screens open but cannot create accounts or sign in.
+
 This is the starter product and Android project skeleton. It does not yet read live SMS or send email. Those features need device testing and a deliberate privacy and permission design.
 
 ## MVP scope
