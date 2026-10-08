@@ -70,6 +70,7 @@ internal fun PetsScreen(store: WorkspaceStore, modifier: Modifier) {
             else error = "Enter six hexadecimal digits, for example #F7C18C."
         }) { Text("Apply colour") }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        PetVoiceSettings(store)
         Text("Your selection is saved on this device. Appearance changes also update the floating pet.",
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
     }

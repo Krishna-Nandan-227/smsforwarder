@@ -57,3 +57,9 @@ Open the separate **Pets** tab to choose Cat, Dog, Elephant, or Rabbit. The cat 
 Sources now includes Instagram, Discord, Teams, Telegram, Signal, Messenger, Slack, and Snapchat alongside SMS, WhatsApp, and Email. Each source requires explicit opt-in. **Add another messaging app** lists other installed launcher apps; choose only the ones whose notification text you want collected. Such apps may also post non-message notifications. No selection connects an account or downloads a conversation history. Hidden, suppressed, and non-text notifications cannot be reconstructed.
 
 Examples: “Summarize Instagram”, “Read Discord messages”, and “Show Teams updates today”.
+
+## Pet look and voice
+
+Pets use a shaded 3D-style illustration with soft highlights, glossy eyes, paws, blinking, and gentle idle movement. Tap the floating companion to open its redesigned daily brief card.
+
+In Pets, scroll to **A voice for your companion**. Choose a downloaded voice from the phone's current text-to-speech engine, adjust speed and pitch, and tap **Preview voice**. Preferences are saved per account and apply to floating-pet briefs. Assistant-tab speech continues to use its existing voice settings. Available voices depend on the installed engine and downloaded voice data; unavailable selections fall back to the device default.

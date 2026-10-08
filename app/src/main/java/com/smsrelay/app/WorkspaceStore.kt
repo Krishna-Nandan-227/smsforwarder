@@ -13,6 +13,15 @@ internal class WorkspaceStore(context: Context, email: String) {
     private val accountKey = MessageDigest.getInstance("SHA-256")
         .digest(email.lowercase().toByteArray()).joinToString("") { "%02x".format(it) }
     private val preferences = context.getSharedPreferences("workspace_$accountKey", Context.MODE_PRIVATE)
+    var petVoiceName: String
+        get() = preferences.getString("pet_voice", "").orEmpty()
+        set(value) { preferences.edit().putString("pet_voice", value).apply() }
+    var petSpeechRate: Float
+        get() = preferences.getFloat("pet_rate", 1f)
+        set(value) { preferences.edit().putFloat("pet_rate", value).apply() }
+    var petPitch: Float
+        get() = preferences.getFloat("pet_pitch", 1f)
+        set(value) { preferences.edit().putFloat("pet_pitch", value).apply() }
     var petSpecies: String
         get() = preferences.getString("pet_species", "Cat").orEmpty().takeIf { it in setOf("Cat", "Dog", "Elephant", "Rabbit") } ?: "Cat"
         set(value) { preferences.edit().putString("pet_species", value).apply() }

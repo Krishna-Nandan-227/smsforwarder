@@ -22,6 +22,7 @@ internal class PhonePet(private val context: Context) {
     private var pet: PetFace? = null
     private var panel: LinearLayout? = null
     private var label: TextView? = null
+    private var title: TextView? = null
     private var nudge: TextView? = null
     private var store: WorkspaceStore? = null
     private var email: String? = null
@@ -109,6 +110,7 @@ internal class PhonePet(private val context: Context) {
         pet?.badge = unseen
         pet?.invalidate()
         nudge?.text = if (unseen > 0) "$unseen new · Tap for a brief" else "$count today"
+        title?.text = store?.petName?.ifBlank { "Your companion" } ?: "Your companion"
         label?.text = "$count collected today" + if (unseen > 0) "\n$unseen new · Want a brief?" else "\nTap Read brief to listen."
     }
     private fun background() = GradientDrawable().apply {
@@ -119,7 +121,12 @@ internal class PhonePet(private val context: Context) {
         text = value; textSize = size; setTextColor(Color.rgb(17, 33, 45))
     }
     private fun button(value: String, action: () -> Unit) = Button(context).apply {
-        text = value; isAllCaps = false; setOnClickListener { action() }
+        text = value; isAllCaps = false; textSize = 14f
+        setTextColor(if (value.startsWith("Read")) Color.WHITE else Color.rgb(37, 55, 69)); background = GradientDrawable().apply {
+            setColor(if (value.startsWith("Read")) Color.rgb(37, 55, 69) else Color.rgb(237, 239, 234)); cornerRadius = dp(14).toFloat()
+        }
+        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(44)).apply { topMargin = dp(6) }
+        setOnClickListener { action() }
     }
     private fun show() {
         val layout = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
@@ -129,11 +136,15 @@ internal class PhonePet(private val context: Context) {
         layout.addView(nudge)
         val details = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL; background = background()
-            setPadding(dp(12), dp(12), dp(12), dp(8))
+            elevation = dp(8).toFloat()
+            setPadding(dp(16), dp(16), dp(16), dp(12))
             visibility = View.GONE
         }
+        title = text("", 22f).apply { typeface = Typeface.create("serif", Typeface.NORMAL) }
+        details.addView(title)
+        details.addView(text("YOUR DAILY COMPANION", 10f).apply { letterSpacing = .12f; setPadding(0, dp(4), 0, dp(12)) })
         label = text("")
-        summary = text("", 14f)
+        summary = text("Your updates, in one quiet place. Tap below for a brief.", 14f).apply { setLineSpacing(dp(3).toFloat(), 1f); setPadding(0, dp(12), 0, dp(12)) }
         details.addView(label)
         details.addView(ScrollView(context).apply {
             addView(summary)
@@ -153,6 +164,7 @@ internal class PhonePet(private val context: Context) {
             } else if (ready) speak(reply.text)
         })
         details.addView(button("Stop voice") { voice?.stop() })
+        details.addView(button("Close panel") { expanded = false; details.visibility = View.GONE; voice?.stop() })
         details.addView(button("Hide pet") { store?.petEnabled = false; hide() })
         layout.addView(details)
         root = layout; pet = face; panel = details; expanded = false
@@ -179,7 +191,7 @@ internal class PhonePet(private val context: Context) {
                         expanded = !expanded; details.visibility = if (expanded) View.VISIBLE else View.GONE
                         // Keep the expanded card within the screen after dragging to an edge.
                         params.x = params.x.coerceAtMost((context.resources.displayMetrics.widthPixels - dp(264)).coerceAtLeast(0))
-                        params.y = params.y.coerceAtMost((context.resources.displayMetrics.heightPixels - dp(470)).coerceAtLeast(dp(24)))
+                        params.y = params.y.coerceAtMost((context.resources.displayMetrics.heightPixels - dp(620)).coerceAtLeast(dp(24)))
                         try { windows.updateViewLayout(layout, params) } catch (_: IllegalArgumentException) { hide() }
                         refresh()
                     }; true
@@ -193,11 +205,13 @@ internal class PhonePet(private val context: Context) {
         catch (_: WindowManager.BadTokenException) { root = null; pet = null; panel = null }
     }
     private fun speak(value: String) {
+        val engine = voice ?: return
+        store?.let { applyPetVoice(engine, it) }
         voice?.speak(value.take(3500), TextToSpeech.QUEUE_FLUSH, null, "pet-brief")
     }
     private fun hide() {
         root?.let { try { windows.removeView(it) } catch (_: IllegalArgumentException) {} }
-        root = null; pet = null; panel = null; label = null; summary = null; nudge = null
+        root = null; pet = null; panel = null; label = null; title = null; summary = null; nudge = null
         voice?.stop()
     }
     fun close() {
