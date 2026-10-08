@@ -135,6 +135,10 @@ internal data class SmsItem(
     val category: String,
     val receivedAt: String,
     val body: String,
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val source: String = "Imported",
+    val sourcePackage: String = "",
+    val capturedAt: Long = System.currentTimeMillis(),
 )
 
 private fun Intent.toSharedSms(): SmsItem? {
@@ -273,7 +277,7 @@ internal fun InboxScreen(
             color = Steel,
         )
         Text(
-            text = if (hasImports) "Imported messages and sample previews" else "Sample inbox · Share SMS text into this app to import it",
+            text = if (hasImports) "Collected notifications and shared messages" else "No messages yet. Enable sources or share text into this app.",
             style = MaterialTheme.typography.bodyMedium,
             color = Steel,
         )
@@ -316,7 +320,7 @@ internal fun InboxScreen(
                             )
                             Surface(shape = RoundedCornerShape(8.dp), color = AppBackground) {
                                 Text(
-                                    text = message.category,
+                                    text = "${message.source} · ${message.category}",
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = DeepSlate,

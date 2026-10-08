@@ -17,8 +17,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,10 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-private enum class WorkspaceTab { Inbox, Accounts, Rules, Profile }
+private enum class WorkspaceTab { Assistant, Inbox, Pets, Sources, Rules, Profile }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,46 +43,56 @@ internal fun WorkspaceScreen(
 ) {
     val context = LocalContext.current
     val store = remember(accountEmail) { WorkspaceStore(context.applicationContext, accountEmail) }
+    val assistantSession = remember(store) { AssistantSession() }
     var accounts by remember(store) { mutableStateOf(store.accounts()) }
     var imports by remember(store) { mutableStateOf(store.messages()) }
     var sharingEnabled by remember(store) { mutableStateOf(store.sharingEnabled) }
     var includeFinancial by remember(store) { mutableStateOf(store.includeFinancial) }
     var allowedSenders by remember(store) { mutableStateOf(store.allowedSenders) }
+    var selectedSources by remember(store) { mutableStateOf(store.selectedSources) }
+    var spokenAlerts by remember(store) { mutableStateOf(store.spokenAlerts) }
+    var assistantAlerts by remember(store) { mutableStateOf(store.assistantAlerts) }
+    var collectionEnabled by remember(store) { mutableStateOf(store.collectionEnabled) }
+    var managingAccounts by remember { mutableStateOf(false) }
     var profileName by remember(store) { mutableStateOf(store.profileName) }
     var aboutMe by remember(store) { mutableStateOf(store.aboutMe) }
-    var tab by rememberSaveable { mutableStateOf(WorkspaceTab.Inbox) }
+    var tab by rememberSaveable { mutableStateOf(WorkspaceTab.Assistant) }
     var search by rememberSaveable { mutableStateOf("") }
     var sharingMessage by remember { mutableStateOf<SmsItem?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
-    BackHandler(enabled = tab != WorkspaceTab.Inbox && sharingMessage == null) { tab = WorkspaceTab.Inbox }
-    val sampleMessages = remember {
-        listOf(
-            SmsItem("ParcelDesk", "Delivery", "Sample · 10:42 AM", "Your parcel is out for delivery. Tracking: PD48291."),
-            SmsItem("City Clinic", "Appointment", "Sample · 9:15 AM", "Reminder: appointment tomorrow at 11:30 AM."),
-            SmsItem("Bank ABC", "Financial", "Sample · Yesterday", "A transaction alert would appear here. Financial messages are hidden by default."),
-        )
+    BackHandler(enabled = (tab != WorkspaceTab.Assistant || managingAccounts) && sharingMessage == null) {
+        if (managingAccounts) managingAccounts = false else tab = WorkspaceTab.Assistant
+    }
+    DisposableEffect(store) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "messages") imports = store.messages()
+        }
+        store.listen(listener)
+        onDispose { store.stopListening(listener) }
     }
     LaunchedEffect(sharedSms, shareSequence) {
         if (sharedSms != null) {
-            imports = listOf(sharedSms) + imports
-            store.saveMessages(imports)
+            store.appendMessages(listOf(sharedSms.copy(category = MessageContent.category(sharedSms.sender + " " + sharedSms.body))))
+            imports = store.messages()
             onClearSharedSms()
             search = ""
             tab = WorkspaceTab.Inbox
         }
     }
     val senderAllowlist = allowedSenders.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-    val visibleMessages = (imports + sampleMessages).filter { item ->
+    val eligibleMessages = imports.filter { item ->
         (includeFinancial || item.category != "Financial") &&
-            (senderAllowlist.isEmpty() || senderAllowlist.any { it.equals(item.sender, ignoreCase = true) }) &&
-            (search.isBlank() || listOf(item.sender, item.body, item.category).any { it.contains(search, ignoreCase = true) })
+            (senderAllowlist.isEmpty() || senderAllowlist.any { it.equals(item.sender, ignoreCase = true) })
     }
+
+    val visibleMessages = eligibleMessages.filter { item -> search.isBlank() ||
+        listOf(item.sender, item.body, item.category, item.source).any { it.contains(search, ignoreCase = true) } }
 
     fun openEmail(item: SmsItem, account: ShareAccount) {
         if (!sharingEnabled) return
-        val subject = "SMS from ${item.sender}"
+        val subject = "${item.source} message from ${item.sender}"
         val body = "Sender: ${item.sender}\nCategory: ${item.category}\nReceived: ${item.receivedAt}\n\n${item.body}"
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.fromParts("mailto", account.email, null).buildUpon()
@@ -109,14 +122,17 @@ internal fun WorkspaceScreen(
                 NavigationBar(containerColor = colors.surface, tonalElevation = 0.dp) {
                     WorkspaceTab.entries.forEach { destination ->
                         NavigationBarItem(
-                            selected = tab == destination, onClick = { tab = destination },
+                            alwaysShowLabel = true,
+                            selected = tab == destination, onClick = { managingAccounts = false; tab = destination },
                             icon = { Icon(when (destination) {
+                                WorkspaceTab.Assistant -> Icons.Outlined.Star
+                                WorkspaceTab.Pets -> Icons.Outlined.Face
                                 WorkspaceTab.Inbox -> Icons.Outlined.Home
-                                WorkspaceTab.Accounts -> Icons.Outlined.Email
+                                WorkspaceTab.Sources -> Icons.Outlined.Email
                                 WorkspaceTab.Rules -> Icons.Outlined.Settings
                                 WorkspaceTab.Profile -> Icons.Outlined.AccountCircle
                             }, contentDescription = null) },
-                            label = { Text(destination.name, style = MaterialTheme.typography.labelSmall) },
+                            label = { Text(destination.name, style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, maxLines = 1) },
                             colors = NavigationBarItemDefaults.colors(indicatorColor = colors.background,
                                 selectedIconColor = colors.primary, selectedTextColor = colors.primary),
                         )
@@ -127,16 +143,22 @@ internal fun WorkspaceScreen(
     ) { padding ->
         val modifier = Modifier.padding(padding)
         when (tab) {
+            WorkspaceTab.Assistant -> AssistantScreen(eligibleMessages, spokenAlerts, assistantSession,
+                onSources = { tab = WorkspaceTab.Sources }, modifier = modifier)
+            WorkspaceTab.Pets -> PetsScreen(store, modifier)
             WorkspaceTab.Inbox -> InboxScreen(visibleMessages, sharingEnabled,
                 onEmailShare = { sharingMessage = it }, search = search, onSearchChange = { search = it },
                 hasImports = imports.isNotEmpty(), modifier = modifier)
-            WorkspaceTab.Accounts -> AccountsScreen(accounts, onSave = { updated ->
-                accounts = updated
-                store.saveAccounts(updated)
-            }, modifier = modifier)
+            WorkspaceTab.Sources -> if (managingAccounts) AccountsScreen(accounts, onSave = { updated ->
+                accounts = updated; store.saveAccounts(updated)
+            }, modifier = modifier) else SourcesScreen(selectedSources, { selectedSources = it; store.selectedSources = it },
+                assistantAlerts, { assistantAlerts = it; store.assistantAlerts = it },
+                onDestinations = { managingAccounts = true }, onClear = { store.clearMessages(); imports = emptyList() }, modifier = modifier)
             WorkspaceTab.Rules -> RulesScreen(sharingEnabled, { sharingEnabled = it; store.sharingEnabled = it },
                 includeFinancial, { includeFinancial = it; store.includeFinancial = it }, allowedSenders,
-                { allowedSenders = it; store.allowedSenders = it }, modifier)
+                { allowedSenders = it; store.allowedSenders = it },
+                collectionEnabled, { collectionEnabled = it; store.collectionEnabled = it },
+                spokenAlerts, { spokenAlerts = it; store.spokenAlerts = it }, modifier)
             WorkspaceTab.Profile -> ProfileScreen(accountEmail, profileName, aboutMe, accounts.size, imports.size,
                 onSave = { name, bio -> profileName = name; aboutMe = bio; store.profileName = name; store.aboutMe = bio },
                 onSignOut = onSignOut, modifier = modifier)
@@ -164,7 +186,7 @@ internal fun WorkspaceScreen(
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { sharingMessage = null; tab = WorkspaceTab.Accounts }) {
+            confirmButton = { TextButton(onClick = { sharingMessage = null; tab = WorkspaceTab.Sources; managingAccounts = true }) {
                 Text("Manage accounts")
             } },
             dismissButton = { TextButton(onClick = { sharingMessage = null }) { Text("Cancel") } },
@@ -173,7 +195,7 @@ internal fun WorkspaceScreen(
 }
 
 @Composable
-private fun WorkspaceCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+internal fun WorkspaceCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
@@ -267,13 +289,17 @@ private fun AccountEditor(account: ShareAccount?, accounts: List<ShareAccount>, 
 @Composable
 private fun RulesScreen(sharingEnabled: Boolean, onSharingChange: (Boolean) -> Unit,
     includeFinancial: Boolean, onFinancialChange: (Boolean) -> Unit,
-    allowedSenders: String, onSendersChange: (String) -> Unit, modifier: Modifier) {
+    allowedSenders: String, onSendersChange: (String) -> Unit,
+    collectionEnabled: Boolean, onCollectionChange: (Boolean) -> Unit,
+    spokenAlerts: Boolean, onSpokenChange: (Boolean) -> Unit, modifier: Modifier) {
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text("Your rules", style = MaterialTheme.typography.headlineSmall)
         Text("Choose what appears in your inbox and when sharing is available.", color = MaterialTheme.colorScheme.secondary)
+        RuleToggle("Collect notifications", "Pause new notification collection from your selected sources.", collectionEnabled, onCollectionChange)
+        RuleToggle("Spoken assistant alerts", "Announce new preview counts while the Assistant screen is open. Message bodies are read only when you ask.", spokenAlerts, onSpokenChange)
         RuleToggle("Allow message sharing", "Turn off to pause sharing from the inbox.", sharingEnabled, onSharingChange)
-        RuleToggle("Show financial messages", "Messages labeled Financial are hidden by default.", includeFinancial, onFinancialChange)
+        RuleToggle("Show financial messages", "Financial previews are excluded from collection and briefs until you opt in.", includeFinancial, onFinancialChange)
         WorkspaceCard {
             Text("Specific senders", style = MaterialTheme.typography.titleMedium)
             Text("Leave blank for all senders. Separate exact sender names or phone numbers with commas.")
@@ -282,13 +308,13 @@ private fun RulesScreen(sharingEnabled: Boolean, onSharingChange: (Boolean) -> U
             Text("Changes are saved automatically.", style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary)
         }
-        Text("Rules use each message's label. Imported texts are labeled User shared. Live SMS collection and automatic forwarding are not connected yet.",
+        Text("Categories and importance use simple text matching and may be imperfect. Notifications only include the previews Android makes available. Automatic forwarding is not connected.",
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
     }
 }
 
 @Composable
-private fun RuleToggle(title: String, detail: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun RuleToggle(title: String, detail: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     WorkspaceCard {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -324,14 +350,14 @@ private fun ProfileScreen(email: String, name: String, bio: String, accounts: In
         WorkspaceCard {
             Text("Your workspace", style = MaterialTheme.typography.titleMedium)
             Text("$accounts saved email destinations")
-            Text("$messages imported messages")
-            Text("Your destinations, profile, rules, and imported messages are saved on this device.",
+            Text("$messages collected messages")
+            Text("Your destinations, profile, rules, and collected messages are saved on this device.",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
         }
         WorkspaceCard {
             Text("About SMSForwarder", style = MaterialTheme.typography.titleMedium)
-            Text("Keep important updates together and share them with the people or accounts you choose.")
-            Text("Version 0.1.0 · Email sharing", style = MaterialTheme.typography.bodySmall,
+            Text("Collect message previews from selected apps, ask for a brief, and listen to the reply.")
+            Text("Version 0.1.0 · Personal message assistant", style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary)
         }
         OutlinedButton(onClick = { confirmSignOut = true }, modifier = Modifier.fillMaxWidth()) { Text("Sign out") }
